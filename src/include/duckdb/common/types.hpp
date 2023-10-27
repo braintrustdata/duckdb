@@ -337,6 +337,8 @@ struct LogicalType {
 
 	DUCKDB_API bool IsValid() const;
 
+	DUCKDB_API bool IsJSONType() const;
+
 private:
 	LogicalTypeId id_;
 	PhysicalType physical_type_;

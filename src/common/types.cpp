@@ -498,6 +498,10 @@ bool LogicalType::IsValid() const {
 	return id() != LogicalTypeId::INVALID && id() != LogicalTypeId::UNKNOWN;
 }
 
+bool LogicalType::IsJSONType() const {
+	return id() == LogicalTypeId::VARCHAR && HasAlias() && GetAlias() == "JSON";
+}
+
 bool LogicalType::GetDecimalProperties(uint8_t &width, uint8_t &scale) const {
 	switch (id_) {
 	case LogicalTypeId::SQLNULL:
@@ -643,6 +647,14 @@ static LogicalType CombineNumericTypes(const LogicalType &left, const LogicalTyp
 }
 
 LogicalType LogicalType::MaxLogicalType(const LogicalType &left, const LogicalType &right) {
+	// If either side is JSON, pick the other side, since each more specific type is
+	// more performant than JSON.
+	if (left.IsJSONType()) {
+		return right;
+	} else if (right.IsJSONType()) {
+		return left;
+	}
+
 	// we always prefer aliased types
 	if (!left.GetAlias().empty()) {
 		return left;
