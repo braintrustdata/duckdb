@@ -159,6 +159,10 @@ bool BoundComparisonExpression::TryBindComparison(ClientContext &context, const 
 			res = LogicalType::NormalizeType(left_type);
 		} else if (right_type.id() != LogicalTypeId::VARCHAR && SwitchVarcharComparison(right_type)) {
 			res = LogicalType::NormalizeType(right_type);
+		} else if (left_type.IsJSONType() && !right_type.IsJSONType()) {
+			res = LogicalType::NormalizeType(right_type);
+		} else if (right_type.IsJSONType() && !left_type.IsJSONType()) {
+			res = LogicalType::NormalizeType(left_type);
 		} else {
 			// else: check if collations are compatible
 			auto left_collation = StringType::GetCollation(left_type);
